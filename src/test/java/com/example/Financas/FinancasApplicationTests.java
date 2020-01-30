@@ -1,5 +1,7 @@
 package com.example.Financas;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,7 @@ import com.example.Financas.model.repository.UsuarioRepository;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class FinancasApplicationTests {
-
+	
 	@Autowired
 	UsuarioRepository repository;
 	
@@ -52,6 +54,50 @@ class FinancasApplicationTests {
 		
 		//verificacao
 		Assertions.assertThat(result).isFalse();
+	}
+	
+	@Test
+	void devePersistirUmUsuarioNaBaseDeDados() {
+		//cenário
+		Usuario usuario = criarUsuario();
+		
+		//acao
+		Usuario usuarioSalvo = repository.save(usuario);
+		
+		
+		//verificacao
+		Assertions.assertThat(usuarioSalvo.getId()).isNotNull();
+	}
+	
+	@Test
+	void deveBuscarUmUsuarioPorEmail() {
+		//cenario
+		Usuario usuario = criarUsuario();
+		entityManager.persist(usuario);
+		
+		//verificacao
+		Optional<Usuario> result = repository.findByEmail("usuario@email.com");
+		
+		Assertions.assertThat(result.isPresent()).isTrue();
+	}
+	
+	@Test 
+	void deveRetornarVazioAoBuscarUsuarioPorEmailQuandoNaoExisteNaBase() {
+	
+		
+		//verificacao
+		Optional<Usuario> result = repository.findByEmail("usuario@email.com");
+		
+		Assertions.assertThat(result.isPresent()).isFalse();
+	}
+	
+	public static Usuario criarUsuario() {
+		return 	Usuario
+				.builder()
+				.nome("usuario")
+				.email("usuario@email.com")
+				.senha("senha")
+				.build();
 	}
 
 }
